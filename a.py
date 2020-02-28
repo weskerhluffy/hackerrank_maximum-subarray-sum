@@ -209,7 +209,6 @@ def maximumSum(a, m):
             r = acum
         raiz = ord_set.insertNode(raiz, acum)
 
-    
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s  %(levelname)-10s %function(processName)s [%(filename)s:%(lineno)s - %(funcName)20s() ] %(name)s %(message)s')
     logger = logging.getLogger('main')
