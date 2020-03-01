@@ -13,13 +13,18 @@ import random
 import re
 import sys
 import logging
-from functools import partial
+from functools import partial, reduce
+                       
+from collections import defaultdict
+from bisect import bisect_right
+from builtins import set
 
 
 class TreeNode(object): 
 
-    def __init__(self, key): 
-        self.key = key 
+    def __init__(self, key, value): 
+        self.key = key
+        self.value = value
         self.left = None
         self.right = None
         self.height = 1
@@ -27,17 +32,23 @@ class TreeNode(object):
 
 class AVL_Tree(object): 
 
-    def insertNode(self, root, key): 
+    def __init__(self):
+        self.root = None
+    
+    def insert(self, key, value):
+        self.root = self.insertNode(self.root, key, value)
+        
+    def insertNode(self, root, key, value): 
         
         if not root: 
-            return TreeNode(key) 
+            return TreeNode(key, value) 
         elif key < root.key: 
-            root.left = self.insertNode(root.left, key) 
+            root.left = self.insertNode(root.left, key, value) 
         else: 
             if key > root.key:
-                root.right = self.insertNode(root.right, key) 
+                root.right = self.insertNode(root.right, key, value) 
             else:
-                # TODO: Actualizar valor
+                root.value = value
                 return root
 
         root.height = 1 + max(self.getHeight(root.left),
@@ -61,7 +72,7 @@ class AVL_Tree(object):
             
         return root 
 
-    def delete(self, root, key): 
+    def deleteNode(self, root, key): 
 
         if not root: 
             return root 
@@ -84,7 +95,8 @@ class AVL_Tree(object):
                 return temp 
 
             temp = self.getMinValueNode(root.right) 
-            root.key = temp.key 
+            root.key = temp.key
+            root.value = temp.value
             root.right = self.delete(root.right,
                                     temp.key) 
 
@@ -165,11 +177,12 @@ class AVL_Tree(object):
         if not root: 
             return
 
-        logger.debug("{0} ".format(root.key), end="") 
         self.preOrder(root.left) 
+        logger.debug("{0} ".format(root.key))
         self.preOrder(root.right) 
     
-    def find_ge(self, root, key):
+    def find_ge(self, key):
+        root = self.root
         if not root: 
             return root 
 
@@ -184,35 +197,87 @@ class AVL_Tree(object):
                 if key > cur.key:
                     cur = cur.right
                 else:
-                    return cur.key
+                    return cur.value
         
-        return last.key if last else None
+        return last.value if last else None
+    
+    def find_gt(self, key):
+        root = self.root
+        if not root: 
+            return root 
+
+        cur = root
+        last = None
         
+        while cur:
+            if key < cur.key:
+                last = cur
+                cur = cur.left
+            else:
+                cur = cur.right
+        
+        return last.value if last else None
+
+
+class OrderedSet():
+
+    def __init__(self):
+        self.arbol = AVL_Tree()
+    
+    def add(self, key):
+        self.arbol.insert(key, key)
+    
+    def find_gt(self, key):
+        return self.arbol.find_gt(key)
+
+
+def fuerza_bruta(a, m):
+    r = 0
+    suma_mod = partial(lambda m, x, y:(x % m + y % m) % m, m)
+    for i in range(len(a)):
+        for j in range(i + 1, len(a)):
+            st = reduce(suma_mod, a[i:j + 1], 0)
+            if st > r:
+                r = st
+    return r
+
 
 def maximumSum(a, m):
-    logger.debug("a {} m {}".format(a, m))
-    suma_mod = partial(lambda m, a, b:(a % m + b % m) % m, m)
-    resta_mod = partial(lambda m, a, b:(a % m - b % m) % m, m)
+#    logger.debug("a {} m {}".format(a, m))
+    suma_mod = partial(lambda m, x, y:(x % m + y % m) % m, m)
+    resta_mod = partial(lambda m, x, y:(x % m - y % m + m) % m, m)
 
-    ord_set = AVL_Tree()
-    raiz = None
+    ord_set = OrderedSet()
+    unord_set = set()
     acum = 0
     r = 0
     for n in a:
-        acum = suma_mod(acum, n)
-        sig = ord_set.find_ge(raiz, acum)
+#        acum = suma_mod(acum, n)
+        acum = (acum+n)%m
+#        logger.debug("acm {}".format(acum))
+        sig = ord_set.find_gt(acum)
         if sig:
-            optim = resta_mod(acum, sig)
+#            optim = resta_mod(acum, sig)
+            optim = (acum-sig+m)%m
             if optim > r:
                 r = optim
         else:
             r = acum
-        raiz = ord_set.insertNode(raiz, acum)
+        if acum not in unord_set:
+            ord_set.add(acum)
+            unord_set.add(acum)
+
+#    rt=fuerza_bruta(a, m)
+#    assert r==rt, "esperado {} real {}".format(r,rt)
+    return r
+
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s  %(levelname)-10s %function(processName)s [%(filename)s:%(lineno)s - %(funcName)20s() ] %(name)s %(message)s')
     logger = logging.getLogger('main')
     logger.setLevel(logging.DEBUG)
+#    logger.setLevel(logging.ERROR)
+
     fptr = open(os.environ['OUTPUT_PATH'], 'w')
 
     q = int(input())
