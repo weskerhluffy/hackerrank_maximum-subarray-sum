@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/home/ernesto/programas/instalados/python/python3.8/bin/python3.8
 '''
 Created on Feb 27, 2020
 
@@ -270,7 +270,6 @@ def maximumSum(a, m):
 #    rt=fuerza_bruta(a, m)
 #    assert r==rt, "esperado {} real {}".format(r,rt)
     return r
-
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s  %(levelname)-10s %function(processName)s [%(filename)s:%(lineno)s - %(funcName)20s() ] %(name)s %(message)s')

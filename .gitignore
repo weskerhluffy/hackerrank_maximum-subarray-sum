@@ -1,1 +1,3 @@
 /out
+*.c.log
+*.shame.log
