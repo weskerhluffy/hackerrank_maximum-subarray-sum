@@ -40,30 +40,50 @@ class AVL_Tree(object):
         
     def insertNode(self, root, key, value): 
         
+        child = TreeNode(key, value)
         if not root: 
-            return TreeNode(key, value) 
-        elif key < root.key: 
-            root.left = self.insertNode(root.left, key, value) 
-        else: 
-            if key > root.key:
-                root.right = self.insertNode(root.right, key, value) 
+            return child
+        
+        cur = root
+        v = []
+        
+        while cur:
+            v.append(cur)
+            if key < cur.key: 
+                cur = cur.left
+            else: 
+                if key > cur.key:
+                    cur = cur.right
+                else:
+                    # Actualizar valor si llave ya esta
+                    cur.value = value
+                    return root
+        
+        while v:
+            cur = v.pop()
+            if key < cur.key:
+                cur.left = child
             else:
-                root.value = value
-                return root
+                cur.right = child
+            child = self.rebalancea(cur, key)
+            
 
+        return child
+    
+    def rebalancea(self, root, key):
         root.height = 1 + max(self.getHeight(root.left),
                         self.getHeight(root.right)) 
  
         balanceFactor = self.getBalance(root) 
 
-        if balanceFactor > 1:
+        if balanceFactor > 3:
             if key < root.left.key: 
                 return self.rightRotate(root) 
             else:
                 root.left = self.leftRotate(root.left) 
                 return self.rightRotate(root)
         
-        if balanceFactor < -1:
+        if balanceFactor < -3:
             if key > root.right.key: 
                 return self.leftRotate(root)
             else:
