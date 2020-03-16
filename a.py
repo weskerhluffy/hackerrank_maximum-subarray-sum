@@ -252,13 +252,11 @@ def maximumSum(a, m):
     acum = 0
     r = 0
     for n in a:
-#        acum = suma_mod(acum, n)
-        acum = (acum+n)%m
+        acum = suma_mod(acum, n)
 #        logger.debug("acm {}".format(acum))
         sig = ord_set.find_gt(acum)
         if sig:
-#            optim = resta_mod(acum, sig)
-            optim = (acum-sig+m)%m
+            optim = resta_mod(acum, sig)
             if optim > r:
                 r = optim
         else:
