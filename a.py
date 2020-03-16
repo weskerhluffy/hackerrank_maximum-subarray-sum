@@ -172,14 +172,15 @@ class AVL_Tree(object):
 
         return self.getMinValueNode(root.left) 
 
-    def preOrder(self, root): 
+    def preOrder(self): 
+        return self.preOrderRec(self.root, [])
+        
+    def preOrderRec(self, root, res): 
 
         if not root: 
-            return
+            return res
 
-        self.preOrder(root.left) 
-        logger.debug("{0} ".format(root.key))
-        self.preOrder(root.right) 
+        return self.preOrderRec(root.right, self.preOrderRec(root.left, res) + [root])
     
     def find_ge(self, key):
         root = self.root
@@ -230,6 +231,10 @@ class OrderedSet():
     def find_gt(self, key):
         return self.arbol.find_gt(key)
 
+    # XXX: https://thispointer.com/python-how-to-make-a-class-iterable-create-iterator-class-for-it/
+    def __iter__(self):
+        return iter(self.arbol.preOrder())
+
 
 def fuerza_bruta(a, m):
     r = 0
@@ -245,7 +250,7 @@ def fuerza_bruta(a, m):
 def maximumSum(a, m):
 #    logger.debug("a {} m {}".format(a, m))
     suma_mod = partial(lambda m, x, y:(x % m + y % m) % m, m)
-    resta_mod = partial(lambda m, x, y:(x % m - y % m + m) % m, m)
+    resta_mod = partial(lambda m, x, y:(x - y + m) % m, m)
 
     ord_set = OrderedSet()
     unord_set = set()
@@ -253,27 +258,33 @@ def maximumSum(a, m):
     r = 0
     for n in a:
         acum = suma_mod(acum, n)
-#        logger.debug("acm {}".format(acum))
+        logger.debug("acm {}".format(acum))
         sig = ord_set.find_gt(acum)
+        optim = acum
         if sig:
             optim = resta_mod(acum, sig)
-            if optim > r:
-                r = optim
-        else:
-            r = acum
+            logger.debug("optimus {}".format(optim))
+        if optim > r:
+            r = optim
         if acum not in unord_set:
             ord_set.add(acum)
             unord_set.add(acum)
+#            todos = list(map(lambda n:n.key, ord_set))
+#            todos_s = sorted(todos)
+#            assert todos == todos_s, "esperado {} obtenido {}".format(todos_s, todos)
+#        logger.debug("r es {} ord set {}".format(r, list(map(lambda n:n.key, ord_set))))
 
 #    rt=fuerza_bruta(a, m)
 #    assert r==rt, "esperado {} real {}".format(r,rt)
     return r
 
+
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s  %(levelname)-10s %function(processName)s [%(filename)s:%(lineno)s - %(funcName)20s() ] %(name)s %(message)s')
+#    logging.basicConfig(format='%(asctime)s  %(levelname)-10s %function(processName)s [%(filename)s:%(lineno)s - %(funcName)20s() ] %(name)s %(message)s')
+    logging.basicConfig(format='%(message)s')
     logger = logging.getLogger('main')
     logger.setLevel(logging.DEBUG)
-#    logger.setLevel(logging.ERROR)
+    logger.setLevel(logging.ERROR)
 
     fptr = open(os.environ['OUTPUT_PATH'], 'w')
 

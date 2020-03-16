@@ -261,7 +261,7 @@ def maximumSum(a, m):
         left = bisect_right(pq, prefix[i])
         if left != len(pq):
             # Update maxmodsum if possible
-            modsum = (prefix[i] - pq[left] + m) % m
+            modsum = (prefix[i]%m - pq[left]%m + m) % m
             maxmodsum = max(maxmodsum, modsum)
 
         # add current prefix to heap
